@@ -1,0 +1,43 @@
+name: enclave
+
+# Local development infrastructure. Credentials are DEV-ONLY — never reuse in production.
+services:
+  postgres:
+    image: postgres:18
+    container_name: enclave-postgres
+    environment:
+      POSTGRES_USER: enclave
+      POSTGRES_PASSWORD: enclave_dev
+      POSTGRES_DB: enclave
+    ports:
+      # 5433 host side to avoid clashing with a locally running Postgres on 5432
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U enclave -d enclave']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: enclave-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: enclave
+      MINIO_ROOT_PASSWORD: enclave_dev
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'mc ready local']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+  miniodata:
