@@ -9,6 +9,20 @@ jobs:
   backend:
     name: Backend (workspaces)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -19,10 +33,39 @@ jobs:
 
       - run: npm ci
 
+      - name: Bootstrap native DB (canonical script)
+        env:
+          PGHOST: localhost
+          PGPASSWORD: postgres
+        run: scripts/db-bootstrap.sh
+
       - run: npm run lint
 
       - run: npm run typecheck
 
       - run: npm test
+        env:
+          TEST_DATABASE_URL: postgres://enclave:enclave_dev@localhost:5432/enclave_test
 
       - run: npm run build
+
+  dart_core:
+    name: Dart crypto core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dart SDK
+        run: |
+          set -euxo pipefail
+          curl -fsSL https://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-x64-release.zip -o /tmp/dartsdk.zip
+          unzip -q /tmp/dartsdk.zip -d /tmp/dart-sdk
+          echo "/tmp/dart-sdk/dart-sdk/bin" >> "$GITHUB_PATH"
+
+      - name: Dart pub get, analyze, test
+        working-directory: packages/dart_core
+        run: |
+          dart --version
+          dart pub get
+          dart analyze
+          dart test
