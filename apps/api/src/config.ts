@@ -5,6 +5,7 @@ export interface AppConfig {
   port: number;
   serviceName: string;
   apiVersion: string;
+  databaseUrl: string;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -12,10 +13,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   if (!Number.isInteger(port) || port <= 0 || port > 65535) {
     throw new Error(`Invalid PORT: ${env.PORT}`);
   }
+  const databaseUrl =
+    env.DATABASE_URL ?? 'postgres://enclave:enclave_dev@localhost:5432/enclave_dev';
   return {
     nodeEnv: env.NODE_ENV ?? 'development',
     port,
     serviceName: 'enclave-api',
     apiVersion: API_VERSION,
+    databaseUrl,
   };
 }
