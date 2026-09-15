@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { createApp } from '../src/app';
+import { createTestContext, type TestContext } from './helpers';
 
 type HealthBody = {
   ok: true;
@@ -10,9 +10,22 @@ type HealthBody = {
 type NotFoundBody = { ok: false; error: { code: string; message: string } };
 
 describe('health route', () => {
+  let ctx: TestContext;
+
+  beforeAll(async () => {
+    ctx = await createTestContext();
+  });
+
+  afterAll(async () => {
+    await ctx.close();
+  });
+
+  beforeEach(async () => {
+    await ctx.truncate();
+  });
+
   it('responds with a healthy envelope', async () => {
-    const app = createApp();
-    const res = await app.request('/health');
+    const res = await ctx.app.request('/health');
 
     expect(res.status).toBe(200);
 
@@ -23,8 +36,7 @@ describe('health route', () => {
   });
 
   it('responds with a structured not-found envelope', async () => {
-    const app = createApp();
-    const res = await app.request('/does-not-exist');
+    const res = await ctx.app.request('/does-not-exist');
 
     expect(res.status).toBe(404);
 
