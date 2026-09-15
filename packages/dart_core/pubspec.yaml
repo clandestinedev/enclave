@@ -1,0 +1,14 @@
+name: enclave_crypto
+description: >-
+  Pure-Dart client-side cryptography core for Encore. Mirrors
+  apps/api/test/reference-client.ts (executable specification).
+version: 0.1.0
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  cryptography: ^2.7.0
+
+dev_dependencies:
+  lints: ^4.0.0
+  test: ^1.25.0
