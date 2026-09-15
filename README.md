@@ -34,8 +34,10 @@ your partner.
 apps/api            Hono + TypeScript backend
 apps/mobile         Flutter mobile app (skeleton)
 packages/contracts  Shared wire contracts (TS)
+packages/dart_core  Pure-Dart client crypto core (headless-tested)
 infra               Docker Compose (Postgres + MinIO), deploy targets
 docs/adr            Architecture Decision Records
+docs/phase1         Phase 1 docs (trust model, keys, payload format, recovery)
 ```
 
 ## Development
@@ -57,9 +59,24 @@ Local infra (Postgres on :5433, MinIO on :9000/9001):
 docker compose -f infra/docker-compose.yml up -d
 ```
 
+The canonical development DB is native Postgres on :5432 (Docker is optional):
+
+```sh
+scripts/db-bootstrap.sh
+npm run dev -w @enclave/api
+```
+
+See `docs/phase1/native-dev-setup.md` for the full setup.
+
 Mobile requires the Flutter toolchain. Run `flutter create .` inside `apps/mobile` once
-the SDK (FVM) is installed to scaffold `android/` / `ios/` platform directories.
+the SDK (FVM) is installed to scaffold `android/` / `ios/` platform directories. The
+client crypto core is independent and can be verified headlessly:
+
+```sh
+cd packages/dart_core && dart pub get && dart test
+```
 
 ## Status
 
-Phase 0 — architecture + repository + tooling. See `docs/adr/0001-architecture-foundation.md`.
+Phase 1 — identity (dev-bootstrap), device registration, E2EE payload roundtrip.
+See `docs/phase1/` and `docs/adr/0002-payload-encryption-protocol.md`.
