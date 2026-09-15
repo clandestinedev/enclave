@@ -41,12 +41,15 @@ export interface DeviceKeyMaterial {
   keyVersion: number;
 }
 
+export function derivePublicKeyValue(privateKey: Uint8Array): string {
+  return toBase64(x25519.getPublicKey(privateKey));
+}
+
 export function createDeviceKeyMaterial(seed?: Uint8Array): DeviceKeyMaterial {
   const privateKey = seed ?? randomBytes(32);
-  const publicKey = x25519.getPublicKey(privateKey);
   return {
     privateKey,
-    publicKeyValue: toBase64(publicKey),
+    publicKeyValue: derivePublicKeyValue(privateKey),
     sealingKey: randomBytes(32),
     keyVersion: DEVICE_KEY_VERSION,
   };
@@ -56,13 +59,19 @@ function aadFor(keyRef: string): Uint8Array {
   return new TextEncoder().encode(`${AAD_PREFIX}${keyRef}`);
 }
 
+/**
+ * Seal a payload. `nonceOverride` is TEST-ONLY: production callers omit it and
+ * get a fresh 24-byte CSPRNG nonce per call. It exists solely so the
+ * cross-language interop test can reproduce deterministic output.
+ */
 export function sealPayload(
   material: DeviceKeyMaterial,
   deviceId: string,
   plaintext: Uint8Array,
+  nonceOverride?: Uint8Array,
 ): EncryptedPayloadEnvelope {
   const keyRef = `${deviceId}:${material.keyVersion}`;
-  const nonce = randomBytes(24);
+  const nonce = nonceOverride ?? randomBytes(24);
   const ciphertext = xchacha20poly1305(material.sealingKey, nonce, aadFor(keyRef)).encrypt(
     plaintext,
   );

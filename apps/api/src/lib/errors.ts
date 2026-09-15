@@ -32,3 +32,23 @@ export function notFound(): AppError {
 export function conflict(message: string): AppError {
   return new AppError(409, 'CONFLICT', message);
 }
+
+export function identityInUse(message = 'Identity public key already registered'): AppError {
+  return new AppError(409, 'IDENTITY_IN_USE', message);
+}
+
+export function signatureInvalid(message = 'Recovery signature is invalid'): AppError {
+  return new AppError(401, 'SIGNATURE_INVALID', message);
+}
+
+export function challengeNotFound(): AppError {
+  return new AppError(404, 'CHALLENGE_NOT_FOUND', 'Recovery challenge not found');
+}
+
+export function challengeUsed(): AppError {
+  return new AppError(409, 'CHALLENGE_USED', 'Recovery challenge already used');
+}
+
+export function challengeExpired(): AppError {
+  return new AppError(410, 'CHALLENGE_EXPIRED', 'Recovery challenge expired');
+}

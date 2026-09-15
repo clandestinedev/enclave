@@ -37,6 +37,7 @@ export class DeviceService {
       publicKeyType: input.publicKey.type,
       publicKeyValue: input.publicKey.value,
       keyVersion: 0,
+      deviceSecretHash: null,
       createdAt,
       lastSeenAt: null,
       revokedAt: null,

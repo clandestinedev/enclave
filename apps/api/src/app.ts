@@ -8,7 +8,10 @@ import { healthRoutes } from './routes/health';
 import { userRoutes } from './routes/v1/users';
 import { deviceRoutes } from './routes/v1/devices';
 import { payloadRoutes } from './routes/v1/payloads';
+import { identityRoutes } from './routes/v1/identities';
+import { recoveryRoutes } from './routes/v1/recovery';
 import type { IdentityService, DeviceService, PayloadService } from './services/identity';
+import type { RecoveryService } from './services/recovery';
 import type { UsersRepository } from './repositories/users';
 import type { DevicesRepository } from './repositories/devices';
 import type { EncryptedPayloadsRepository } from './repositories/payloads';
@@ -17,6 +20,7 @@ export interface AppDeps {
   identityService: IdentityService;
   deviceService: DeviceService;
   payloadService: PayloadService;
+  recoveryService: RecoveryService;
   users: UsersRepository;
   devices: DevicesRepository;
   payloads: EncryptedPayloadsRepository;
@@ -28,8 +32,13 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   app.route('/health', healthRoutes);
 
   app.route('/v1/users', userRoutes(deps.identityService));
-  app.route('/v1/devices', deviceRoutes(deps.devices, deps.users, deps.deviceService));
+  app.route(
+    '/v1/devices',
+    deviceRoutes(deps.devices, deps.users, deps.deviceService, deps.recoveryService),
+  );
   app.route('/v1/payloads', payloadRoutes(deps.payloadService, deps.users, deps.deviceService));
+  app.route('/v1/identities', identityRoutes(deps.users, deps.recoveryService));
+  app.route('/v1/recovery', recoveryRoutes(deps.users, deps.devices, deps.recoveryService));
 
   app.notFound((c) => c.json(fail('NOT_FOUND', 'Route not found'), 404));
 

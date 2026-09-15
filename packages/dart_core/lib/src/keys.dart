@@ -39,6 +39,15 @@ Uint8List csprng(int length) {
   return bytes;
 }
 
+/// Derives the X25519 public key base64 string from a raw 32-byte private key.
+/// Mirrors `derivePublicKeyValue` in apps/api/test/reference-client.ts.
+Future<String> derivePublicKeyValue(Uint8List privateKey) async {
+  final x25519 = X25519();
+  final keyPair = await x25519.newKeyPairFromSeed(privateKey);
+  final publicKey = await keyPair.extractPublicKey();
+  return base64Encode(publicKey.bytes);
+}
+
 /// Creates a fresh device identity: X25519 keypair + 256-bit sealing key.
 /// All randomness comes from the platform CSPRNG.
 Future<DeviceKeyMaterial> createDeviceKeyMaterial() async {

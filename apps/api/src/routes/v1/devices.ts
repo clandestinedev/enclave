@@ -7,11 +7,13 @@ import { invalidRequest, notFound } from '../../lib/errors';
 import type { UsersRepository } from '../../repositories/users';
 import type { DevicesRepository } from '../../repositories/devices';
 import type { DeviceService } from '../../services/identity';
+import type { RecoveryService } from '../../services/recovery';
 
 export function deviceRoutes(
   devices: DevicesRepository,
   users: UsersRepository,
   deviceService: DeviceService,
+  recovery: RecoveryService,
 ): Hono<AppEnv> {
   const r = new Hono<AppEnv>();
   r.use('*', requireAccount(users));
@@ -56,6 +58,7 @@ export function deviceRoutes(
     const deviceId = c.req.param('deviceId');
     const view = await deviceService.revokeDevice(userId, deviceId);
     if (!view) throw notFound();
+    await recovery.revokeBlobForDevice(deviceId);
     return c.json(ok(view));
   });
 

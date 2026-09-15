@@ -8,6 +8,13 @@
       "when": 1789387774258,
       "tag": "0000_swift_shinobi_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789491266481,
+      "tag": "0001_fresh_imperial_guard",
+      "breakpoints": true
     }
   ]
 }

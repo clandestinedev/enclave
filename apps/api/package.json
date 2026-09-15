@@ -27,6 +27,7 @@
     "@noble/ciphers": "^2.4.0",
     "@noble/curves": "^2.4.0",
     "@noble/hashes": "^2.4.0",
+    "@scure/bip39": "^2.4.0",
     "@types/node": "^26.5.1",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.10",

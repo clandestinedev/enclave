@@ -7,7 +7,11 @@ import { createDbClient, type Database } from '../src/db/client';
 import { PgUsersRepository } from '../src/repositories/users';
 import { PgDevicesRepository } from '../src/repositories/devices';
 import { PgEncryptedPayloadsRepository } from '../src/repositories/payloads';
+import { PgIdentitiesRepository } from '../src/repositories/identities';
+import { PgRecoveryChallengesRepository } from '../src/repositories/recovery-challenges';
+import { PgRecoveryBlobsRepository } from '../src/repositories/recovery-blobs';
 import { IdentityService, DeviceService, PayloadService } from '../src/services/identity';
+import { RecoveryService } from '../src/services/recovery';
 import { createApp } from '../src/app';
 import type { AppEnv } from '../src/auth/middleware';
 
@@ -29,15 +33,20 @@ export async function createTestContext(): Promise<TestContext> {
   const users = new PgUsersRepository(db);
   const devices = new PgDevicesRepository(db);
   const payloads = new PgEncryptedPayloadsRepository(db);
+  const identities = new PgIdentitiesRepository(db);
+  const challenges = new PgRecoveryChallengesRepository(db);
+  const blobs = new PgRecoveryBlobsRepository(db);
 
   const identityService = new IdentityService(users);
   const deviceService = new DeviceService(devices);
   const payloadService = new PayloadService(payloads, devices);
+  const recoveryService = new RecoveryService({ identities, challenges, blobs, devices });
 
   const app = createApp({
     identityService,
     deviceService,
     payloadService,
+    recoveryService,
     users,
     devices,
     payloads,
@@ -49,7 +58,7 @@ export async function createTestContext(): Promise<TestContext> {
     app,
     async truncate() {
       await pool.query(
-        'TRUNCATE TABLE encrypted_payloads, devices, users RESTART IDENTITY CASCADE',
+        'TRUNCATE TABLE device_recovery_blobs, recovery_challenges, identities, encrypted_payloads, devices, users RESTART IDENTITY CASCADE',
       );
     },
     async close() {

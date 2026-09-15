@@ -1,0 +1,28 @@
+{
+  "_comment": "TEST-ONLY recovery interop vector. The mnemonic, passphrase, seed, keys, signature, and blob are deterministic test data derived from the PUBLIC BIP39 spec test vector (mnemonic 'abandon ... about', passphrase 'TREZOR', see BIP-0039 vector 1). Nothing here is a real credential. DO NOT use these values anywhere except the two test files that consume this vector.",
+  "version": 1,
+  "mnemonic": "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+  "passphrase": "TREZOR",
+  "seed": "xVJXw2DAfHICmuvBtTwF7QNiraOOrT4+nvo3COU0lVMfCaaYdZnRgmTB4ckvLPFBYwx6PEq3yBsvABaY50Y7BA==",
+  "signingPrivateKey": "EQnkNeAdNGlUX53gbWZeGDqTGsnSdJ+PD/3JewGZlYQ=",
+  "identityPublicKeyValue": "yId0Hk7LR+VKlkqQp9MwK1Dji6zqkqhY7E7wVZQnulw=",
+  "wrappingKey": "Q1Nx5BPpvpmO3euNZfqctshzsEbLWyUTbxygI2Vlnd0=",
+  "userId": "aaaaaaaa-0000-0000-0000-000000000011",
+  "challengeId": "aaaaaaaa-0000-0000-0000-000000000022",
+  "deviceId": "aaaaaaaa-0000-0000-0000-000000000033",
+  "keyVersion": 0,
+  "devicePrivateKey": "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=",
+  "devicePublicKeyValue": "B6N8vBQgk8i3VdwbEOhstCY3StFqqFPtC9/AsrhtHHw=",
+  "deviceSealingKey": "87SBKEGAG3437ToJIdplf00i1Dmrq8YL3/fU9Wto5kE=",
+  "signature": "M5+AJy5sN6Ny1zMtZA5O3zSmjoI2ps/CJX/i25oNmaNOOKnwH2+UxIEp4VcOC/UvIMgJUxoWbnzm5D/vphYUAA==",
+  "messageHex": "656e636c6176652f7265636f766572792d76310061616161616161612d303030302d303030302d303030302d3030303030303030303031310061616161616161612d303030302d303030302d303030302d3030303030303030303032320042364e38764251676b38693356647762454f687374435933537446717146507443392f41737268744848773d",
+  "blob": {
+    "v": 1,
+    "alg": "xchacha20poly1305",
+    "userId": "aaaaaaaa-0000-0000-0000-000000000011",
+    "deviceId": "aaaaaaaa-0000-0000-0000-000000000033",
+    "keyVersion": 0,
+    "nonce": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZX",
+    "ciphertext": "MdpsTTsAOTtMMqqZlwlh0nK8WBR7ugq9q0OlvaaPnNSMvXjFp36/oxvoG9s2QVeJW83GpG2f6wu+CK2OPrylOfS/IuW1sIy776LfnzzeZysF3PNdZhNGAKfI1tmEalfT2lyGjmL7iYNOyoHXxKJxXiTeHREms4lnTd5nhzbWrTb/1X4mji/OHvigPpeFqqh5yCb31a/p5go6TOn+tqKfIKNLqlSernoeirIrvqP231qogfP8g+2XWYaMiLXpza9MVb5voCKtg93cWlAqjVnSFDSOrgZkK7z0hFl+wUGvFGoOwYzFZgH26uOCq2t0BSXdk/nvTPedmklFHvJ0N99fF04kbMY+IiM2URz9zOOhblU="
+  }
+}

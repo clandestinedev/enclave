@@ -35,3 +35,32 @@ export type {
   DeviceView,
   CreateDeviceResponse,
 } from './identity';
+export {
+  identityKeyVersionSchema,
+  identityPublicKeySchema,
+  createIdentityRequestSchema,
+  identityViewSchema,
+  createIdentityResponseSchema,
+  createRecoveryChallengeRequestSchema,
+  createRecoveryChallengeResponseSchema,
+  recoverySignatureSchema,
+  completeRecoveryRequestSchema,
+  completeRecoveryResponseSchema,
+  recoveryBlobEnvelopeSchema,
+  createRecoveryBlobRequestSchema,
+  recoveryBlobViewSchema,
+  listRecoveryBlobsResponseSchema,
+} from './recovery';
+export type {
+  CreateIdentityRequest,
+  IdentityView,
+  CreateIdentityResponse,
+  CreateRecoveryChallengeRequest,
+  CreateRecoveryChallengeResponse,
+  CompleteRecoveryRequest,
+  CompleteRecoveryResponse,
+  RecoveryBlobEnvelope,
+  CreateRecoveryBlobRequest,
+  RecoveryBlobView,
+  ListRecoveryBlobsResponse,
+} from './recovery';

@@ -74,13 +74,18 @@ Xchacha20 _xchacha20() => Xchacha20.poly1305Aead();
 
 /// Seals `plaintext` for `deviceId` under the device sealing key.
 /// Returns an envelope ready to POST to /v1/payloads.
+///
+/// `[nonceOverride]` is TEST-ONLY: production callers omit it and get a fresh
+/// 24-byte CSPRNG nonce per call. It exists solely so the cross-language
+/// interop test can reproduce deterministic output byte-for-byte.
 Future<EncryptedPayloadEnvelope> sealPayload(
   DeviceKeyMaterial material,
   String deviceId,
-  List<int> plaintext,
-) async {
+  List<int> plaintext, [
+  Uint8List? nonceOverride,
+]) async {
   final keyRef = '$deviceId:${material.keyVersion}';
-  final nonce = csprng(nonceLength);
+  final nonce = nonceOverride ?? csprng(nonceLength);
   final box = await _xchacha20().encrypt(
     plaintext,
     secretKey: SecretKey(material.sealingKey),

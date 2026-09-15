@@ -10,6 +10,7 @@ export interface DeviceRecord {
   publicKeyType: string;
   publicKeyValue: string;
   keyVersion: number;
+  deviceSecretHash: string | null;
   createdAt: Date;
   lastSeenAt: Date | null;
   revokedAt: Date | null;
@@ -18,6 +19,7 @@ export interface DeviceRecord {
 export interface DevicesRepository {
   create(device: DeviceRecord): Promise<void>;
   getById(id: string): Promise<DeviceRecord | null>;
+  findByDeviceSecretHash(hash: string): Promise<DeviceRecord | null>;
   listByUserId(userId: string): Promise<DeviceRecord[]>;
   markSeen(id: string, at: Date): Promise<void>;
   revoke(id: string, at: Date): Promise<void>;
@@ -34,12 +36,23 @@ export class PgDevicesRepository implements DevicesRepository {
       publicKeyType: device.publicKeyType,
       publicKeyValue: device.publicKeyValue,
       keyVersion: device.keyVersion,
+      deviceSecretHash: device.deviceSecretHash,
       createdAt: device.createdAt,
     });
   }
 
   async getById(id: string): Promise<DeviceRecord | null> {
     const rows = await this.db.select().from(devices).where(eq(devices.id, id)).limit(1);
+    const row = rows[0];
+    return row ? toRecord(row) : null;
+  }
+
+  async findByDeviceSecretHash(hash: string): Promise<DeviceRecord | null> {
+    const rows = await this.db
+      .select()
+      .from(devices)
+      .where(eq(devices.deviceSecretHash, hash))
+      .limit(1);
     const row = rows[0];
     return row ? toRecord(row) : null;
   }
@@ -76,6 +89,7 @@ function toRecord(row: typeof devices.$inferSelect): DeviceRecord {
     publicKeyType: row.publicKeyType,
     publicKeyValue: row.publicKeyValue,
     keyVersion: row.keyVersion,
+    deviceSecretHash: row.deviceSecretHash,
     createdAt: row.createdAt,
     lastSeenAt: row.lastSeenAt,
     revokedAt: row.revokedAt,
