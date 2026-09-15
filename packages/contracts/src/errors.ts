@@ -1,0 +1,10 @@
+export const API_ERROR_CODES = [
+  'INVALID_REQUEST',
+  'UNAUTHORIZED',
+  'FORBIDDEN',
+  'NOT_FOUND',
+  'CONFLICT',
+  'DEVICE_REVOKED',
+  'RATE_LIMITED',
+  'INTERNAL_ERROR',
+] as const;

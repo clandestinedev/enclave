@@ -1,5 +1,7 @@
+import type { API_ERROR_CODES } from './errors';
+
 export interface ApiError {
-  code: string;
+  code: (typeof API_ERROR_CODES)[number];
   message: string;
 }
 
