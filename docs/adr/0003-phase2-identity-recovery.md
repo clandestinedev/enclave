@@ -81,6 +81,18 @@ deviceId ──► X25519 keypair (public part registered)
           ──► sealing key: 32 random CSPRNG bytes (seals payloads, ADR 0002)
 ```
 
+> **[Phase-3 addendum — AMENDED 2026-09-16]** The seed is used for three
+> things: **identity signing** (auth/recovery proof), **recovery wrapping**
+> (protecting the backup blob), and **relationship-static derivation** (Model F,
+> ADR 0004 §D2): a domain-separated X25519 scalar
+> `HKDF-SHA512(seed, "enclave/relationship-identity-v1", "x25519", 32)`. These
+> three never produce a device key or a content key; the relationship static
+> feeds only ECDH inputs and is itself a signing/ECDH input, never an encryption
+> key. The sentence this marker amends — "The seed is used for exactly two
+> things … Neither ever produces a device key or a content key." — is preserved
+> above as the original Phase 2 wording; see the Phase-3 addendum §A below for
+> the supersession record.
+
 - The seed is used for exactly two things: **identity signing** (auth/recovery proof) and **recovery wrapping** (protecting the backup blob). Neither ever produces a device key or a content key.
 - Device sealing keys are _recoverable_ only because a wrapped copy is stored server-side (§5/§12), encrypted under the seed-derived wrapping key.
 
@@ -105,6 +117,15 @@ Attack matrix:
 | Mnemonic + blob         | **Defeated** — this is exactly recovery          |
 | A live, unlocked device | Defeated — device holds real keys (out of scope) |
 
+> **[Phase-3 addendum — AMENDED 2026-09-16]** The relationship static key
+> (Model F, ADR 0004) is never used to encrypt content. Its only outputs are
+> ECDH shared secrets, from which HKDF yields (a) the relationship root key RK
+> which wraps per-drop content keys and (b) an out-of-band SAS for pairing
+> verification. RK/SAS never seal content bytes directly, so the §5 title
+> ("Can BIP39-derived material directly decrypt any content? — No.") and the
+> attack matrix above are unchanged: relationship statics chain only into
+> key-wrapping material, exactly like the recovery wrapping key.
+
 ## 6. Relationship keys and content keys stay separate from identity/recovery keys
 
 Three disjoint layers:
@@ -112,6 +133,16 @@ Three disjoint layers:
 1. **Identity/recovery layer** (seed-derived): identity signing key, recovery wrapping key.
 2. **Content layer** (random per device, Phase 1 → per-payload in Phase 3): sealing keys, payload envelopes. Content keys are never seed-derived.
 3. **Relationship layer** (future, Phase 3+): per-relationship wrap keys used with a second user's device keys. Also random, never seed-derived.
+
+> **[Phase-3 addendum — AMENDED 2026-09-16]** Relationship layer (ADR 0004):
+> one seed-derived relationship static X25519 key per user (Model F). Its ECDH
+> output + HKDF ("enclave/relationship-rk-v1") produce the relationship root key
+> RK, which wraps random per-drop content keys — those wrap/content keys remain
+> random and never seed-derived; only the _ECDH input_ (the static scalar) traces
+> to the seed. This amendment supersedes the prior wording "Also random, never
+> seed-derived" (preserved immediately above): relationship **content/wrap** keys
+> are random; the relationship **ECDH input** is seed-derived. See Phase-3
+> addendum §A for the full supersession record.
 
 Rules:
 
@@ -143,6 +174,16 @@ The mnemonic is the root of the account's _identity_, so its compromise is by de
   - Recovery events must be server-logged and (Phase 4+) alerted (e.g., email/notification on new-device enrollment) so a silent takeover is harder to do unnoticed.
   - No device or account operation ever re-displays the mnemonic; it exists only at creation and reentry.
 - Accepted: without passphrase + alerts, mnemonic compromise == identity compromise. This is standard for self-custodial systems; it is why secure, offline backup guidance (§11) is mandatory.
+
+> **[Phase-3 addendum — AMENDED 2026-09-16]** Mnemonic compromise also exposes
+> the relationship statics (Model F, ADR 0004): the attacker recomputes the
+> relationship static scalar, obtains the partner's relayed statics/epoch from
+> the server, derives RK, and reads relationship content. As with the recovery
+> blob (§5 matrix), this is a documented catastrophic self-custody case; re-key
+> (ADR 0004 §9) and recovery alerting (this §9 roadmap) are **post-detection
+> containment, not prevention**. No Phase-3 mechanism prevents it; prevention
+> would require dropping server-mediated recovery or a PAKE-hardened recovery
+> channel (deferred research).
 
 ## 10. 12 words vs 24 words
 
@@ -199,3 +240,33 @@ Never stored server-side: mnemonic, BIP39 seed, any seed-derived private key or 
 ## Status
 
 Proposed. **No implementation as of this ADR.** Founder approval of §10 (word count/tiering) and Open decision #1 (HKDF vs BIP32) is required before Phase 2 implementation begins. Pending also: ADR 0002 sign-off.
+
+---
+
+## §A. Phase-3 addendum — relationship-static derivation (Model F) (2026-09-16)
+
+- **Purpose:** records the founder-ratified Phase 3 decision (ADR 0004 O1) that
+  introduces a third seed use — the **relationship static X25519 scalar** —
+  and explicitly supersedes the prior Phase 2 statements (preserved in place
+  above, with inline markers) that seed-derived material is **never** used in
+  the relationship layer.
+- **Superseded wording (preserved at its original location):**
+  1. §4: "The seed is used for exactly two things: identity signing … and
+     recovery wrapping … Neither ever produces a device key or a content key."
+     → now **three** uses (identity signing, recovery wrapping,
+     relationship-static derivation).
+  2. §6 layer 3: "Also random, never seed-derived" (per-relationship wrap keys)
+     → now: relationship **content/wrap** keys remain random; the relationship
+     **ECDH input** (the static scalar) is seed-derived.
+- **Unchanged:** the seed never produces a device key or a content key, and
+  seed-derived material never directly encrypts content (§5 matrix). The new
+  static's outputs (RK, SAS) are wrapping/verification material only.
+- **Expected probability of reversal:** low. Model F is ratified; Model R
+  (random static via `enclave/device-link-v1` wrap) is documented in ADR 0004
+  §D2 as the non-MVP alternative and would delay/undo this amendment if adopted.
+- **Rationale (why derive from seed):** first-class recovery. Every certified
+  device re-derives the static; no key transport; the relationship survives
+  device loss without requiring the partner's devices online.
+- **Consequences:** Mnemonic + server access ⇒ relationship content (documented
+  above in §9 addendum); T8 containment (re-key + alerting) is ADR 0004 U4.
+  Forward secrecy remains explicitly out of Phase 3 (ADR 0004 O2).
