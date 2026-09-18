@@ -126,6 +126,13 @@ rogue-device gap.
   retain access to ciphertext/key material it already obtained; revocation does
   not retroactively erase secrets already held by a device. Client-verifiable
   signed revocation is deferred to Phase 4.
+- **Epoch implication:** successful revocation stops a revoked device from
+  participating in new operations, but in Model F the device already holds the
+  current epoch's RK and may keep opening material it obtained before
+  revocation; only a re-key (epoch++) rotates the RK and bounds that window —
+  revocation alone does not rotate relationship keys. On termination the epoch
+  is closed and clients discard RK; old ciphertext remains ciphertext (opaque)
+  until explicitly re-sealed (design review §9, U3).
 
 ### D8. Forward secrecy stays deferred (ADR 0001 D14)
 

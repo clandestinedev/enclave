@@ -434,7 +434,10 @@ product picks UX/disclosure.
   transcript → new RK. Triggered by suspected mnemonic/device compromise (T8 —
   **post-detection containment**, clearly NOT prevention), breakup re-pair, or
   policy. Old epochs burned for new content; active drops re-sealed gradually
-  (OPEN PRODUCT U3).
+  (OPEN PRODUCT U3). **Old ciphertext from closed/burned epochs remains
+  ciphertext:** it stays opaque and is only unlockable by whoever holds that
+  epoch's RK (or the per-drop content keys) — re-key does not decrypt or rewrite
+  it; migrating it is the explicit re-seal path (U3).
 - **Revocation (RATIFIED O3, server-honored for MVP):** server marks the device
   revoked (existing `devices.revokedAt`), drops its recovery blob, invalidates
   its device secret, and MUST refuse it new relationship/content operations per
@@ -444,7 +447,11 @@ product picks UX/disclosure.
   operations; a revoked/compromised device that already possesses valid keys may
   retain access to ciphertext/key material it already obtained; revocation does
   not retroactively erase secrets already held by a device. Client-verifiable
-  signed revocation is deferred to Phase 4.
+  signed revocation is deferred to Phase 4. **Epoch implication:** successful
+  revocation stops a revoked device from participating in new operations, but in
+  Model F the device already holds the current epoch's RK and may keep opening
+  material it obtained before revocation; only a re-key (epoch++) rotates the RK
+  and bounds that window — revocation alone does not rotate relationship keys.
 
 ## 10. Server Trust Boundary & API/Schema/DB Proposal
 
