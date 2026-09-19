@@ -10,8 +10,11 @@ import { PgEncryptedPayloadsRepository } from '../src/repositories/payloads';
 import { PgIdentitiesRepository } from '../src/repositories/identities';
 import { PgRecoveryChallengesRepository } from '../src/repositories/recovery-challenges';
 import { PgRecoveryBlobsRepository } from '../src/repositories/recovery-blobs';
+import { PgRelationshipsRepository } from '../src/repositories/relationships';
+import { PgRelationshipEpochsRepository } from '../src/repositories/relationship-epochs';
 import { IdentityService, DeviceService, PayloadService } from '../src/services/identity';
 import { RecoveryService } from '../src/services/recovery';
+import { RelationshipService } from '../src/services/relationships';
 import { createApp } from '../src/app';
 import type { AppEnv } from '../src/auth/middleware';
 
@@ -36,17 +39,27 @@ export async function createTestContext(): Promise<TestContext> {
   const identities = new PgIdentitiesRepository(db);
   const challenges = new PgRecoveryChallengesRepository(db);
   const blobs = new PgRecoveryBlobsRepository(db);
+  const relationships = new PgRelationshipsRepository(db);
+  const relationshipEpochs = new PgRelationshipEpochsRepository(db);
 
   const identityService = new IdentityService(users);
-  const deviceService = new DeviceService(devices);
+  const deviceService = new DeviceService(devices, identities);
   const payloadService = new PayloadService(payloads, devices);
   const recoveryService = new RecoveryService({ identities, challenges, blobs, devices });
+  const relationshipService = new RelationshipService({
+    relationships,
+    epochs: relationshipEpochs,
+    devices,
+    identities,
+    users,
+  });
 
   const app = createApp({
     identityService,
     deviceService,
     payloadService,
     recoveryService,
+    relationshipService,
     users,
     devices,
     payloads,
@@ -58,7 +71,7 @@ export async function createTestContext(): Promise<TestContext> {
     app,
     async truncate() {
       await pool.query(
-        'TRUNCATE TABLE device_recovery_blobs, recovery_challenges, identities, encrypted_payloads, devices, users RESTART IDENTITY CASCADE',
+        'TRUNCATE TABLE relationship_epochs, relationships, device_recovery_blobs, recovery_challenges, identities, encrypted_payloads, devices, users RESTART IDENTITY CASCADE',
       );
     },
     async close() {
