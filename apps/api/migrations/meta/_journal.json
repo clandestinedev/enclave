@@ -15,6 +15,13 @@
       "when": 1789491266481,
       "tag": "0001_fresh_imperial_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789757070251,
+      "tag": "0002_curly_white_tiger",
+      "breakpoints": true
     }
   ]
 }

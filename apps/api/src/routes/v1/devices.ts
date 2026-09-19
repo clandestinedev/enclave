@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createDeviceRequestSchema } from '@enclave/contracts';
+import { certifyDeviceRequestSchema, createDeviceRequestSchema } from '@enclave/contracts';
 
 import { type AppEnv, requireAccount } from '../../auth/middleware';
 import { ok } from '../../lib/envelope';
@@ -50,6 +50,25 @@ export function deviceRoutes(
     const userId = c.get('userId');
     const views = await deviceService.listOwnDevices(userId);
     return c.json(ok(views));
+  });
+
+  // POST /v1/devices/:deviceId/cert — certify an existing (e.g. recovered)
+  // device so it can participate in relationships. Account-level operation.
+  r.post('/:deviceId/cert', async (c) => {
+    const userId = c.get('userId');
+    const deviceId = c.req.param('deviceId');
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      throw invalidRequest('Invalid JSON');
+    }
+    const parsed = certifyDeviceRequestSchema.safeParse(body);
+    if (!parsed.success) throw invalidRequest('Invalid certificate');
+
+    const view = await deviceService.certifyDevice(userId, deviceId, parsed.data);
+    if (!view) throw notFound();
+    return c.json(ok(view));
   });
 
   // POST /v1/devices/:deviceId/revoke

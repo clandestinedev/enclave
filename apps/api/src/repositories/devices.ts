@@ -11,6 +11,8 @@ export interface DeviceRecord {
   publicKeyValue: string;
   keyVersion: number;
   deviceSecretHash: string | null;
+  certSignature: string | null;
+  certVersion: number | null;
   createdAt: Date;
   lastSeenAt: Date | null;
   revokedAt: Date | null;
@@ -23,6 +25,7 @@ export interface DevicesRepository {
   listByUserId(userId: string): Promise<DeviceRecord[]>;
   markSeen(id: string, at: Date): Promise<void>;
   revoke(id: string, at: Date): Promise<void>;
+  setCert(id: string, certSignature: string, certVersion: number): Promise<void>;
 }
 
 export class PgDevicesRepository implements DevicesRepository {
@@ -37,6 +40,8 @@ export class PgDevicesRepository implements DevicesRepository {
       publicKeyValue: device.publicKeyValue,
       keyVersion: device.keyVersion,
       deviceSecretHash: device.deviceSecretHash,
+      certSignature: device.certSignature,
+      certVersion: device.certVersion,
       createdAt: device.createdAt,
     });
   }
@@ -69,6 +74,10 @@ export class PgDevicesRepository implements DevicesRepository {
   async revoke(id: string, at: Date): Promise<void> {
     await this.db.update(devices).set({ revokedAt: at }).where(eq(devices.id, id));
   }
+
+  async setCert(id: string, certSignature: string, certVersion: number): Promise<void> {
+    await this.db.update(devices).set({ certSignature, certVersion }).where(eq(devices.id, id));
+  }
 }
 
 export function getOwnDevice(
@@ -90,6 +99,8 @@ function toRecord(row: typeof devices.$inferSelect): DeviceRecord {
     publicKeyValue: row.publicKeyValue,
     keyVersion: row.keyVersion,
     deviceSecretHash: row.deviceSecretHash,
+    certSignature: row.certSignature,
+    certVersion: row.certVersion,
     createdAt: row.createdAt,
     lastSeenAt: row.lastSeenAt,
     revokedAt: row.revokedAt,

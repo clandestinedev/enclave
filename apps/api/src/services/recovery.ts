@@ -152,6 +152,8 @@ export class RecoveryService {
       publicKeyValue: input.deviceKey.value,
       keyVersion: DEVICE_KEY_VERSION,
       deviceSecretHash: digestSecret(deviceSecret),
+      certSignature: null,
+      certVersion: null,
       createdAt: new Date(),
       lastSeenAt: null,
       revokedAt: null,

@@ -10,8 +10,10 @@ import { deviceRoutes } from './routes/v1/devices';
 import { payloadRoutes } from './routes/v1/payloads';
 import { identityRoutes } from './routes/v1/identities';
 import { recoveryRoutes } from './routes/v1/recovery';
+import { relationshipRoutes } from './routes/v1/relationships';
 import type { IdentityService, DeviceService, PayloadService } from './services/identity';
 import type { RecoveryService } from './services/recovery';
+import type { RelationshipService } from './services/relationships';
 import type { UsersRepository } from './repositories/users';
 import type { DevicesRepository } from './repositories/devices';
 import type { EncryptedPayloadsRepository } from './repositories/payloads';
@@ -21,6 +23,7 @@ export interface AppDeps {
   deviceService: DeviceService;
   payloadService: PayloadService;
   recoveryService: RecoveryService;
+  relationshipService: RelationshipService;
   users: UsersRepository;
   devices: DevicesRepository;
   payloads: EncryptedPayloadsRepository;
@@ -39,6 +42,10 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   app.route('/v1/payloads', payloadRoutes(deps.payloadService, deps.users, deps.deviceService));
   app.route('/v1/identities', identityRoutes(deps.users, deps.recoveryService));
   app.route('/v1/recovery', recoveryRoutes(deps.users, deps.devices, deps.recoveryService));
+  app.route(
+    '/v1/relationships',
+    relationshipRoutes(deps.users, deps.devices, deps.relationshipService),
+  );
 
   app.notFound((c) => c.json(fail('NOT_FOUND', 'Route not found'), 404));
 

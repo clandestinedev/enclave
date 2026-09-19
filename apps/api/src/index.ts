@@ -9,8 +9,11 @@ import { PgEncryptedPayloadsRepository } from './repositories/payloads';
 import { PgIdentitiesRepository } from './repositories/identities';
 import { PgRecoveryChallengesRepository } from './repositories/recovery-challenges';
 import { PgRecoveryBlobsRepository } from './repositories/recovery-blobs';
+import { PgRelationshipsRepository } from './repositories/relationships';
+import { PgRelationshipEpochsRepository } from './repositories/relationship-epochs';
 import { IdentityService, DeviceService, PayloadService } from './services/identity';
 import { RecoveryService } from './services/recovery';
+import { RelationshipService } from './services/relationships';
 
 const config = loadConfig();
 const { db } = createDbClient(config.databaseUrl);
@@ -21,17 +24,27 @@ const payloads = new PgEncryptedPayloadsRepository(db);
 const identities = new PgIdentitiesRepository(db);
 const challenges = new PgRecoveryChallengesRepository(db);
 const blobs = new PgRecoveryBlobsRepository(db);
+const relationships = new PgRelationshipsRepository(db);
+const relationshipEpochs = new PgRelationshipEpochsRepository(db);
 
 const identityService = new IdentityService(users);
-const deviceService = new DeviceService(devices);
+const deviceService = new DeviceService(devices, identities);
 const payloadService = new PayloadService(payloads, devices);
 const recoveryService = new RecoveryService({ identities, challenges, blobs, devices });
+const relationshipService = new RelationshipService({
+  relationships,
+  epochs: relationshipEpochs,
+  devices,
+  identities,
+  users,
+});
 
 const app = createApp({
   identityService,
   deviceService,
   payloadService,
   recoveryService,
+  relationshipService,
   users,
   devices,
   payloads,

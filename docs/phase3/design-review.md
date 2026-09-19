@@ -360,9 +360,9 @@ Phase-3 implementation:
                                   (epoch starts)                        B posts sasProof_B
                                                                    │ mismatch → REJECTED (T1 flag)
                                                                    │ timeout → EXPIRED
-        REJECTED (responder refuses, signed) — terminal
-        CANCELLED (initiator withdraws pre-accept) — terminal
-        TERMINATED (breakup; signed by one/both) — terminal  │ re-key: epoch++, new statics → fresh offer with new transcript (T14/T8 containment)
+        REJECTED (responder refuses; pole-authenticated, unsigned) — terminal
+        CANCELLED (initiator withdraws from PENDING or ACCEPTED; pole-authenticated, unsigned) — terminal
+        TERMINATED (breakup; pole-authenticated, unsigned) — terminal  │ re-key: epoch++, new statics → fresh offer with new transcript (T14/T8 containment)
         MEMORIALIZED (survivor mode — OPEN PRODUCT U1)
 ```
 
@@ -428,8 +428,9 @@ product picks UX/disclosure.
 
 ## 9. Termination, Re-key & Revocation
 
-- **Termination:** signed (one or both poles); relationship → TERMINATED; epoch
-  closed; clients discard RK; new pairing allowed afterward.
+- **Termination:** pole-authenticated, unsigned (one pole); relationship →
+  TERMINATED; epoch closed; clients discard RK; new pairing allowed afterward.
+  Established relationships are not subject to the original offer TTL.
 - **Re-key (epoch++):** new statics (rotated RKA/RKB) + fresh epochNonce + fresh
   transcript → new RK. Triggered by suspected mnemonic/device compromise (T8 —
   **post-detection containment**, clearly NOT prevention), breakup re-pair, or
@@ -485,7 +486,7 @@ SAS values, mnemonic/seed, any plaintext. Enforced by §11 invariants + tests.
 - `POST /v1/relationships/:id/accept` — responder: `{ transcript, consentSignature, relationshipStaticPublicKey, ephemeralPublicKey }`.
 - `POST /v1/relationships/:id/confirm` — initiator: `{ transcript, consentSignature }` + `{ sasProof }`.
 - `POST /v1/relationships/:id/establish` — responder posts `{ sasProof }` (both present + equal → ESTABLISHED).
-- `POST /v1/relationships/:id/reject` | `/cancel` — signed refusals/withdrawal.
+- `POST /v1/relationships/:id/reject` (responder) | `/cancel` (initiator; PENDING or ACCEPTED) — pole-authenticated, unsigned refusals/withdrawal.
 - `POST /v1/relationships/:id/rekey` — epoch++ (both consent sigs over new T).
 - `POST /v1/relationships/:id/terminate` — end → TERMINATED / MEMORIALIZED (U1).
 - `POST /v1/devices` (extended) — registration now requires `certSignature`/`certVersion`.
